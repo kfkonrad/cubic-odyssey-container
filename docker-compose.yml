@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  cubic-odyssey:
+    build: .
+    container_name: cubic-odyssey-server
+    restart: unless-stopped
+
+    environment:
+      # Steam credentials (OPTIONAL - Anonymous download supported)
+      STEAM_USER: ${STEAM_USER:-}
+      STEAM_PASS: ${STEAM_PASS:-}
+      STEAM_AUTH: ${STEAM_AUTH:-}
+
+      # Server configuration
+      SERVER_NAME: ${SERVER_NAME:-Cubic Odyssey Server}
+      SERVER_PASSWORD: ${SERVER_PASSWORD:-}
+      GAME_PORT: ${GAME_PORT:-20000}
+      MAX_PLAYERS: ${MAX_PLAYERS:-20}
+      GAMEMODE: ${GAMEMODE:-adventure}
+      PRIVATE_SERVER: ${PRIVATE_SERVER:-FALSE}
+      GALAXY_SEED: ${GALAXY_SEED:-21945875634}
+
+      # Update settings
+      AUTO_UPDATE: ${AUTO_UPDATE:-1}
+
+      # Required internal variables
+      SRCDS_APPID: "3858450"
+      WINDOWS_INSTALL: "1"
+
+    ports:
+      - "${GAME_PORT:-20000}:${GAME_PORT:-20000}/udp"
+
+    volumes:
+      # Persist server data
+      - ./server_data:/home/container
+
+    stdin_open: true
+    tty: true
+
+    # Resource limits (adjust as needed)
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
