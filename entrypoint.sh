@@ -76,11 +76,39 @@ EOF
     echo -e "${GREEN}Configuration complete!${NC}"
 }
 
+game_server_is_up_to_date() {
+    local manifest="/home/container/cubic-odyssey/steamapps/appmanifest_${SRCDS_APPID}.acf"
+    if [ ! -f "$manifest" ]; then
+        return 1
+    fi
+
+    local installed_buildid
+    installed_buildid=$(sed -n 's/.*"buildid"[[:space:]]*"\([0-9]*\)".*/\1/p' "$manifest")
+    if [ -z "$installed_buildid" ]; then
+        echo -e "${YELLOW}Could not determine currently installed version, updating to be safe...${NC}"
+        return 1
+    fi
+
+    local latest_buildid
+    latest_buildid=$(curl -sSL "https://api.steamcmd.net/v1/info/${SRCDS_APPID}" | sed -n 's/.*"buildid" *: *"\([0-9]*\)".*/\1/p' | head -1)
+    if [ -z "$latest_buildid" ]; then
+        echo -e "${YELLOW}Could not check for updates, updating to be safe...${NC}"
+        return 1
+    fi
+
+    if [ "$installed_buildid" != "$latest_buildid" ]; then
+        echo -e "${YELLOW}Update available: build ${installed_buildid} -> ${latest_buildid}${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}Server is up to date (build ${installed_buildid})${NC}"
+    return 0
+}
+
 if [ ! -f "/home/container/cubic-odyssey/server/CubicOdysseyServer.exe" ]; then
     echo -e "${YELLOW}Server files not found. Installing...${NC}"
     install_server
-elif [ "${AUTO_UPDATE}" == "1" ]; then
-    echo -e "${YELLOW}Auto-update enabled. Checking for updates...${NC}"
+elif [ "${AUTO_UPDATE}" == "1" ] && ! game_server_is_up_to_date; then
     install_server
 else
     echo -e "${GREEN}Server files found. Skipping installation.${NC}"
@@ -92,6 +120,5 @@ cd /home/container/cubic-odyssey
 
 echo -e "${GREEN}Starting Cubic Odyssey Server...${NC}"
 
-sleep 9999999999
 exec wine ./server/CubicOdysseyServer.exe \
     -Gamemode="${GAMEMODE}"
