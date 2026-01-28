@@ -1,39 +1,58 @@
-version: '3.8'
-
 services:
   cubic-odyssey:
     build: .
     container_name: cubic-odyssey-server
     restart: unless-stopped
+    mac_address: ${MAC_ADDRESS:-}
 
     environment:
       # Steam credentials (OPTIONAL - Anonymous download supported)
-      STEAM_USER: ${STEAM_USER:-}
+      STEAM_USER: ${STEAM_USER:-anonymous}
       STEAM_PASS: ${STEAM_PASS:-}
       STEAM_AUTH: ${STEAM_AUTH:-}
 
       # Server configuration
-      SERVER_NAME: ${SERVER_NAME:-Cubic Odyssey Server}
-      SERVER_PASSWORD: ${SERVER_PASSWORD:-}
-      GAME_PORT: ${GAME_PORT:-20000}
-      MAX_PLAYERS: ${MAX_PLAYERS:-20}
       GAMEMODE: ${GAMEMODE:-adventure}
+
+      STARTING_PORT: ${STARTING_PORT:-20000}
+      ENDING_PORT: ${ENDING_PORT:-20015}
+      SERVER_NAME: ${SERVER_NAME:-Cubic Odyssey Container Server}
+      SERVER_PASSWORD: ${SERVER_PASSWORD:-}
+      MAX_PLAYERS: ${MAX_PLAYERS:-10}
+      GALAXY_SEED: ${GALAXY_SEED:-0}
+      ALLOW_RELAYING: ${ALLOW_RELAYING:-FALSE}
       PRIVATE_SERVER: ${PRIVATE_SERVER:-FALSE}
-      GALAXY_SEED: ${GALAXY_SEED:-21945875634}
+      ENABLE_CRASH_DUMPS: ${ENABLE_CRASH_DUMPS:-FALSE}
+      ENABLE_LOGGING: ${ENABLE_LOGGING:-FALSE}
+
+      # Difficulty Settings
+      DAMAGE_PLAYER_SCALE: ${DAMAGE_PLAYER_SCALE:-1}
+      DAMAGE_PIRATE_SCALE: ${DAMAGE_PIRATE_SCALE:-1}
+      DAMAGE_CREATURE_SCALE: ${DAMAGE_CREATURE_SCALE:-1}
+      DAMAGE_DARKNESS_SCALE: ${DAMAGE_DARKNESS_SCALE:-1}
+      DAMAGE_PLAYER_SHIP_SCALE: ${DAMAGE_PLAYER_SHIP_SCALE:-1}
+      DAMAGE_PIRATE_SHIP_SCALE: ${DAMAGE_PIRATE_SHIP_SCALE:-1}
+      CRAFTING_COST_SCALE: ${CRAFTING_COST_SCALE:-1}
+      TRADING_COST_SCALE: ${TRADING_COST_SCALE:-1}
+      DAMAGE_GEAR_ON_DEATH: ${DAMAGE_GEAR_ON_DEATH:-false}
+      LOSE_QBITS_ON_DEATH: ${LOSE_QBITS_ON_DEATH:-false}
 
       # Update settings
       AUTO_UPDATE: ${AUTO_UPDATE:-1}
 
       # Required internal variables
       SRCDS_APPID: "3858450"
-      WINDOWS_INSTALL: "1"
+
+    env_file:
+    - path: ./.env
+      required: false
 
     ports:
-      - "${GAME_PORT:-20000}:${GAME_PORT:-20000}/udp"
+      - "${STARTING_PORT:-20000}-${ENDING_PORT:-20015}:${STARTING_PORT:-20000}-${ENDING_PORT:-20015}/udp"
 
     volumes:
       # Persist server data
-      - ./server_data:/home/container
+      - ./server_data:/home/container/cubic-odyssey
 
     stdin_open: true
     tty: true
@@ -45,3 +64,8 @@ services:
           memory: 4G
         reservations:
           memory: 2G
+
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

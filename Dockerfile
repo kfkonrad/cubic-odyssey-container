@@ -6,19 +6,20 @@ LABEL description="Cubic Odyssey Dedicated Server"
 # Set working directory
 WORKDIR /home/container
 
-# Install additional dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    lib32gcc-s1 \
-    && rm -rf /var/lib/apt/lists/*
-
 # Create necessary directories
 RUN mkdir -p /home/container/.steam/sdk32 \
     /home/container/.steam/sdk64 \
     /home/container/steamcmd \
     /home/container/steamapps
+
+# Install SteamCMD and bootstrap it to get steamclient.so files
+RUN cd /home/container/steamcmd && \
+    curl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz && \
+    tar -xzvf steamcmd.tar.gz && \
+    rm steamcmd.tar.gz && \
+    ./steamcmd.sh +quit && \
+    ln -s /home/container/steamcmd/linux32/steamclient.so /home/container/.steam/sdk32/steamclient.so && \
+    ln -s /home/container/steamcmd/linux64/steamclient.so /home/container/.steam/sdk64/steamclient.so
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
