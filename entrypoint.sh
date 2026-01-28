@@ -17,6 +17,12 @@ install_server() {
 
     cd /home/container/steamcmd
 
+    echo -e "${YELLOW}Warming up SteamCMD...${NC}"
+    ./steamcmd.sh \
+        +login "${STEAM_USER}" "${STEAM_PASS}" "${STEAM_AUTH}" \
+        +app_license_request ${SRCDS_APPID} \
+        +quit || true
+
     echo -e "${YELLOW}Running SteamCMD to install/update server files...${NC}"
     ./steamcmd.sh \
         +force_install_dir /home/container/cubic-odyssey \
