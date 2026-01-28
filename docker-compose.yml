@@ -51,8 +51,7 @@ services:
       - "${STARTING_PORT:-20000}-${ENDING_PORT:-20015}:${STARTING_PORT:-20000}-${ENDING_PORT:-20015}/udp"
 
     volumes:
-      # Persist server data
-      - ./server_data:/home/container/cubic-odyssey
+      - server_data:/home/container/cubic-odyssey
 
     stdin_open: true
     tty: true
@@ -69,3 +68,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  server_data:
