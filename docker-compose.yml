@@ -4,6 +4,7 @@ services:
     container_name: cubic-odyssey-server
     restart: unless-stopped
     mac_address: ${MAC_ADDRESS:-}
+    network_mode: ${NETWORK_MODE:-}
 
     environment:
       # Steam credentials (OPTIONAL - Anonymous download supported)
