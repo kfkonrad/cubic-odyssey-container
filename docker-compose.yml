@@ -1,10 +1,7 @@
-services:
-  cubic-odyssey:
+x-cubic-odyssey-base: &cubic-odyssey-base
     build: .
     container_name: cubic-odyssey-server
     restart: unless-stopped
-    mac_address: ${MAC_ADDRESS:-}
-    network_mode: ${NETWORK_MODE:-}
 
     environment:
       # Steam credentials (OPTIONAL - Anonymous download supported)
@@ -69,6 +66,19 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+services:
+  cubic-odyssey-docker:
+    <<: *cubic-odyssey-base
+    profiles:
+    - docker
+    mac_address: ${MAC_ADDRESS:-}
+
+  cubic-odyssey-podman:
+    <<: *cubic-odyssey-base
+    profiles:
+    - podman
+    network_mode: pasta:--ns-mac-addr=${MAC_ADDRESS:-}
 
 volumes:
   server_data:
